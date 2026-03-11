@@ -42,66 +42,121 @@
             color: #ffd700;
         }
         
+        /* 标准军棋棋盘容器 */
+        .board-container {
+            background: linear-gradient(180deg, #8B7355 0%, #6B5345 100%);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            border: 3px solid #4a3728;
+        }
+        
         /* 标准军棋棋盘：5 行 12 列 */
         .board {
             display: grid;
             grid-template-columns: repeat(12, 1fr);
             grid-template-rows: repeat(5, 1fr);
-            gap: 2px;
-            background: #3d6016;
-            padding: 6px;
-            border-radius: 6px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            max-width: 100%;
-            overflow-x: auto;
+            gap: 1px;
+            background: #5a4635;
+            padding: 2px;
+            border-radius: 4px;
         }
         
         .cell {
-            width: 32px;
-            height: 32px;
-            min-width: 32px;
-            min-height: 32px;
-            background: #90EE90;
-            border: 2px solid #228B22;
-            border-radius: 3px;
+            width: 36px;
+            height: 36px;
+            min-width: 36px;
+            min-height: 36px;
+            background: #c2b280;
+            border: 1px solid #8b7355;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s;
             font-weight: bold;
             font-size: 14px;
             user-select: none;
             position: relative;
         }
         
-        /* 行营位置（圆形）*/
-        .cell.camp {
-            background: #7CB342;
-            border-radius: 50%;
-            border: 2px dashed #558B2F;
+        /* 铁路线 - 上下两行，中间有连线 */
+        .cell.railway {
+            background: linear-gradient(90deg, #d4c4a8 0%, #e8dcc8 50%, #d4c4a8 100%);
+            border: 1px dashed #8b7355;
         }
         
-        /* 大本营位置 */
+        /* 铁路线中间部分（工兵可以拐弯）*/
+        .cell.railway-center {
+            background: linear-gradient(90deg, #d4c4a8 0%, #e8dcc8 50%, #d4c4a8 100%);
+            position: relative;
+        }
+        
+        .cell.railway-center::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #8b7355;
+            transform: translateY(-50%);
+        }
+        
+        /* 行营 - 圆形安全区 */
+        .cell.camp {
+            background: #a8c8a8;
+            border-radius: 50%;
+            border: 2px solid #5a8b5a;
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            min-height: 32px;
+            margin: 2px;
+        }
+        
+        /* 大本营 - 军旗位置 */
         .cell.base {
-            background: #558B2F;
-            border: 2px solid #33691E;
+            background: #b8a888;
+            border: 2px solid #8b7355;
+            position: relative;
+        }
+        
+        .cell.base::after {
+            content: '★';
+            position: absolute;
+            font-size: 10px;
+            color: #6b5345;
+            top: 2px;
+            right: 2px;
+        }
+        
+        /* 山地 - 不能通行 */
+        .cell.mountain {
+            background: #6b7b5a;
+            border: 1px solid #4a5b3a;
+        }
+        
+        .cell.mountain::after {
+            content: '⛰';
+            font-size: 16px;
+            color: #4a5b3a;
         }
         
         .cell:hover {
-            transform: scale(1.08);
-            box-shadow: 0 0 10px rgba(255,255,255,0.3);
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
             z-index: 10;
         }
         
         .cell.red {
-            background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+            background: linear-gradient(135deg, #ff6b6b, #ee5a5a) !important;
             color: white;
             border-color: #cc0000;
         }
         
         .cell.blue {
-            background: linear-gradient(135deg, #4a90d9, #357abd);
+            background: linear-gradient(135deg, #4a90d9, #357abd) !important;
             color: white;
             border-color: #0066cc;
         }
@@ -191,11 +246,6 @@
             font-size: 20px;
         }
         
-        .modal p {
-            margin: 10px 0;
-            line-height: 1.6;
-        }
-        
         .share-link {
             background: rgba(255,255,255,0.1);
             padding: 12px;
@@ -206,35 +256,28 @@
             font-size: 13px;
         }
         
-        @media (max-width: 450px) {
+        @media (max-width: 500px) {
             .cell {
-                width: 26px;
-                height: 26px;
-                min-width: 26px;
-                min-height: 26px;
+                width: 28px;
+                height: 28px;
+                min-width: 28px;
+                min-height: 28px;
                 font-size: 12px;
             }
             
-            .board {
-                gap: 1px;
-                padding: 4px;
+            .cell.camp {
+                width: 24px;
+                height: 24px;
+                min-width: 24px;
+                min-height: 24px;
+            }
+            
+            .board-container {
+                padding: 8px;
             }
             
             h1 {
                 font-size: 18px;
-            }
-            
-            .game-info {
-                padding: 8px 12px;
-            }
-            
-            .current-player {
-                font-size: 0.95em;
-            }
-            
-            .controls button {
-                padding: 8px 14px;
-                font-size: 13px;
             }
         }
     </style>
@@ -244,10 +287,11 @@
     
     <div class="game-info">
         <div class="current-player" id="currentPlayer">点击棋子开始游戏</div>
-        <div id="gameStatus" style="margin-top: 8px; font-size: 0.9em;"></div>
     </div>
     
-    <div class="board" id="board"></div>
+    <div class="board-container">
+        <div class="board" id="board"></div>
+    </div>
     
     <div class="controls">
         <button class="btn-primary" onclick="newGame()">新游戏</button>
@@ -270,14 +314,18 @@
     <div class="modal" id="rulesModal">
         <div class="modal-content">
             <h2>📜 游戏规则</h2>
+            <p><strong>棋盘说明：</strong></p>
+            <p>🛤 铁路线：上下两行，工兵可任意移动</p>
+            <p>⭕ 行营：圆形安全区，8 个位置</p>
+            <p>⭐ 大本营：军旗必须放在这里</p>
+            <p>⛰ 山地：不能通行</p>
+            <br>
             <p><strong>棋子大小：</strong></p>
             <p>司令 > 军长 > 师长 > 旅长 > 团长 > 营长 > 连长 > 排长 > 工兵</p>
             <p><strong>特殊：</strong></p>
             <p>🔸 炸弹：同归于尽</p>
             <p>🔸 地雷：只能工兵挖</p>
             <p>🔸 军旗：被扛走就输</p>
-            <p><strong>操作：</strong></p>
-            <p>点击背面棋子翻开，点击己方棋子选中，再点击相邻位置移动/攻击</p>
             <button class="btn-primary" onclick="closeModal('rulesModal')" style="margin-top: 15px;">知道了</button>
         </div>
     </div>
@@ -292,43 +340,57 @@
     </div>
 
     <script>
-        // 棋子大小等级
         const PIECE_RANK = {
             '司': 10, '军': 9, '师': 8, '旅': 7, '团': 6, '营': 5,
             '连': 4, '排': 3, '工': 2, '炸': 99, '雷': 1, '旗': 0
         };
         
         let board = [];
-        let currentPlayer = null;  // null 表示还没确定
+        let currentPlayer = null;
         let player1Color = null;
         let player2Color = null;
         let selectedCell = null;
-        let redFlagPos = null;
-        let blueFlagPos = null;
-        let firstFlip = true;  // 是否是第一次翻棋
+        let firstFlip = true;
         
         // 标准军棋棋盘布局（5 行 12 列）
-        // 行营位置：(1,2), (1,4), (1,7), (1,9), (3,2), (3,4), (3,7), (3,9)
-        // 大本营位置：(0,1), (0,10), (4,1), (4,10)
+        // 行营位置
         const CAMP_POSITIONS = [
             {row: 1, col: 2}, {row: 1, col: 4}, {row: 1, col: 7}, {row: 1, col: 9},
             {row: 3, col: 2}, {row: 3, col: 4}, {row: 3, col: 7}, {row: 3, col: 9}
         ];
         
+        // 大本营位置（军旗位）
         const BASE_POSITIONS = [
             {row: 0, col: 1}, {row: 0, col: 10},
             {row: 4, col: 1}, {row: 4, col: 10}
         ];
         
-        function isCamp(row, col) {
-            return CAMP_POSITIONS.some(pos => pos.row === row && pos.col === col);
+        // 山地位置（不能通行）
+        const MOUNTAIN_POSITIONS = [
+            {row: 2, col: 0}, {row: 2, col: 11},
+            {row: 1, col: 5}, {row: 1, col: 6},
+            {row: 3, col: 5}, {row: 3, col: 6}
+        ];
+        
+        // 铁路线位置（上下两行，除去大本营和山地）
+        const RAILWAY_POSITIONS = [];
+        for (let j = 0; j < 12; j++) {
+            if (!BASE_POSITIONS.some(p => p.row === 0 && p.col === j)) {
+                RAILWAY_POSITIONS.push({row: 0, col: j});
+            }
+            if (!BASE_POSITIONS.some(p => p.row === 4 && p.col === j)) {
+                RAILWAY_POSITIONS.push({row: 4, col: j});
+            }
         }
         
-        function isBase(row, col) {
-            return BASE_POSITIONS.some(pos => pos.row === row && pos.col === col);
+        function getCellType(row, col) {
+            if (CAMP_POSITIONS.some(p => p.row === row && p.col === col)) return 'camp';
+            if (BASE_POSITIONS.some(p => p.row === row && p.col === col)) return 'base';
+            if (MOUNTAIN_POSITIONS.some(p => p.row === row && p.col === col)) return 'mountain';
+            if (RAILWAY_POSITIONS.some(p => p.row === row && p.col === col)) return 'railway';
+            return 'normal';
         }
         
-        // 初始化棋盘
         function initBoard() {
             const boardEl = document.getElementById('board');
             boardEl.innerHTML = '';
@@ -338,28 +400,25 @@
                 board[i] = [];
                 for (let j = 0; j < 12; j++) {
                     const cell = document.createElement('div');
-                    cell.className = 'cell back';
+                    const cellType = getCellType(i, j);
                     
-                    // 标记特殊位置
-                    if (isCamp(i, j)) {
-                        cell.classList.add('camp');
-                    } else if (isBase(i, j)) {
-                        cell.classList.add('base');
-                    }
+                    cell.className = 'cell';
+                    if (cellType === 'camp') cell.classList.add('camp');
+                    else if (cellType === 'base') cell.classList.add('base');
+                    else if (cellType === 'mountain') cell.classList.add('mountain');
+                    else if (cellType === 'railway') cell.classList.add('railway');
                     
                     cell.dataset.row = i;
                     cell.dataset.col = j;
                     cell.onclick = () => handleCellClick(i, j);
                     boardEl.appendChild(cell);
-                    board[i][j] = { element: cell, piece: null, revealed: false };
+                    board[i][j] = { element: cell, piece: null, revealed: false, type: cellType };
                 }
             }
         }
         
-        // 布置棋子（50 个棋子，60 个位置，空 10 个）
         function setupPieces() {
             const pieces = [
-                // 红方 25 子
                 { type: '司', color: 'red' }, { type: '军', color: 'red' },
                 { type: '师', color: 'red' }, { type: '师', color: 'red' },
                 { type: '旅', color: 'red' }, { type: '旅', color: 'red' },
@@ -371,7 +430,6 @@
                 { type: '炸', color: 'red' }, { type: '炸', color: 'red' },
                 { type: '雷', color: 'red' }, { type: '雷', color: 'red' }, { type: '雷', color: 'red' },
                 { type: '旗', color: 'red' },
-                // 蓝方 25 子
                 { type: '司', color: 'blue' }, { type: '军', color: 'blue' },
                 { type: '师', color: 'blue' }, { type: '师', color: 'blue' },
                 { type: '旅', color: 'blue' }, { type: '旅', color: 'blue' },
@@ -385,49 +443,43 @@
                 { type: '旗', color: 'blue' }
             ];
             
-            // 洗牌
             for (let i = pieces.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [pieces[i], pieces[j]] = [pieces[j], pieces[i]];
             }
             
-            // 随机选择 50 个位置放置棋子
             const positions = [];
             for (let i = 0; i < 5; i++) {
                 for (let j = 0; j < 12; j++) {
-                    positions.push({row: i, col: j});
+                    const type = getCellType(i, j);
+                    if (type !== 'mountain' && type !== 'camp') {
+                        positions.push({row: i, col: j});
+                    }
                 }
             }
             
-            // 打乱位置
             for (let i = positions.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [positions[i], positions[j]] = [positions[j], positions[i]];
             }
             
-            // 放置棋子
             for (let i = 0; i < pieces.length; i++) {
                 const pos = positions[i];
                 board[pos.row][pos.col].piece = pieces[i];
-                if (pieces[i].type === '旗') {
-                    if (pieces[i].color === 'red') redFlagPos = {row: pos.row, col: pos.col};
-                    else blueFlagPos = {row: pos.row, col: pos.col};
-                }
             }
         }
         
-        // 处理点击
         function handleCellClick(row, col) {
             const cell = board[row][col];
             
-            // 如果已选中棋子，尝试移动
+            if (cell.type === 'mountain') return;
+            
             if (selectedCell) {
                 if (row === selectedCell.row && col === selectedCell.col) {
                     clearSelection();
                     return;
                 }
                 
-                // 尝试移动或攻击
                 if (!cell.revealed) {
                     movePiece(selectedCell.row, selectedCell.col, row, col);
                 } else if (cell.piece && cell.piece.color !== currentPlayer) {
@@ -436,7 +488,6 @@
                 return;
             }
             
-            // 翻开棋子或选择己方棋子
             if (!cell.revealed && cell.piece) {
                 flipPiece(row, col);
             } else if (cell.revealed && cell.piece && cell.piece.color === currentPlayer) {
@@ -444,36 +495,31 @@
             }
         }
         
-        // 翻开棋子
         function flipPiece(row, col) {
             const cell = board[row][col];
             cell.revealed = true;
             updateCellDisplay(row, col);
             
-            // 第一次翻棋，确定玩家颜色
             if (firstFlip) {
                 player1Color = cell.piece.color;
                 player2Color = cell.piece.color === 'red' ? 'blue' : 'red';
                 currentPlayer = player1Color;
                 firstFlip = false;
                 document.getElementById('currentPlayer').textContent = 
-                    `红方先翻，${player1Color === 'red' ? '翻到红方' : '翻到蓝方'}，继续回合`;
-                return;  // 第一次翻棋后不切换玩家
+                    `${player1Color === 'red' ? '🔴 红方' : '🔵 蓝方'}先手，继续回合`;
+                return;
             }
             
-            // 切换玩家
             currentPlayer = currentPlayer === player1Color ? player2Color : player1Color;
             updateGameInfo();
         }
         
-        // 选择棋子
         function selectPiece(row, col) {
             clearSelection();
             selectedCell = { row, col };
             board[row][col].element.classList.add('selected');
         }
         
-        // 清除选择
         function clearSelection() {
             if (selectedCell) {
                 board[selectedCell.row][selectedCell.col].element.classList.remove('selected');
@@ -481,12 +527,15 @@
             }
         }
         
-        // 移动棋子
         function movePiece(fromRow, fromCol, toRow, toCol) {
             const fromCell = board[fromRow][fromCol];
             const toCell = board[toRow][toCol];
             
-            // 检查是否是相邻移动（上下左右）
+            if (toCell.type === 'mountain') {
+                alert('山地不能通行！');
+                return;
+            }
+            
             const diffRow = Math.abs(fromRow - toRow);
             const diffCol = Math.abs(fromCol - toCol);
             
@@ -495,9 +544,6 @@
                 return;
             }
             
-            // 行营不能停留（可选规则，这里允许）
-            
-            // 移动
             toCell.piece = fromCell.piece;
             toCell.revealed = true;
             fromCell.piece = null;
@@ -508,23 +554,25 @@
             
             clearSelection();
             
-            // 检查是否扛旗
             if (toCell.piece.type === '旗') {
                 endGame(currentPlayer === player1Color ? '玩家 1' : '玩家 2');
                 return;
             }
             
-            // 切换玩家
             currentPlayer = currentPlayer === player1Color ? player2Color : player1Color;
             updateGameInfo();
         }
         
-        // 攻击
         function attack(fromRow, fromCol, toRow, toCol) {
             const fromCell = board[fromRow][fromCol];
             const toCell = board[toRow][toCol];
             const attacker = fromCell.piece;
             const defender = toCell.piece;
+            
+            if (toCell.type === 'mountain') {
+                alert('山地不能攻击！');
+                return;
+            }
             
             const diffRow = Math.abs(fromRow - toRow);
             const diffCol = Math.abs(fromCol - toCol);
@@ -534,46 +582,31 @@
                 return;
             }
             
-            let result = '';
-            
-            // 处理炸弹
             if (attacker.type === '炸' || defender.type === '炸') {
                 fromCell.piece = null;
                 toCell.piece = null;
-                result = '同归于尽！';
-            }
-            // 处理地雷
-            else if (defender.type === '雷') {
+            } else if (defender.type === '雷') {
                 if (attacker.type === '工') {
                     toCell.piece = null;
                     fromCell.piece = attacker;
-                    result = '工兵排雷！';
                 } else {
                     fromCell.piece = null;
-                    result = '撞雷了！';
                 }
-            }
-            // 处理军旗
-            else if (defender.type === '旗') {
+            } else if (defender.type === '旗') {
                 endGame(currentPlayer === player1Color ? '玩家 1' : '玩家 2');
                 return;
-            }
-            // 正常战斗
-            else {
+            } else {
                 const attackerRank = PIECE_RANK[attacker.type];
                 const defenderRank = PIECE_RANK[defender.type];
                 
                 if (attackerRank > defenderRank) {
                     toCell.piece = attacker;
                     fromCell.piece = null;
-                    result = '胜利！';
                 } else if (attackerRank < defenderRank) {
                     fromCell.piece = null;
-                    result = '失败！';
                 } else {
                     fromCell.piece = null;
                     toCell.piece = null;
-                    result = '同归于尽！';
                 }
             }
             
@@ -587,12 +620,9 @@
             updateGameInfo();
         }
         
-        // 检查胜利条件
         function checkWinCondition() {
-            let redHasFlag = false;
-            let blueHasFlag = false;
-            let redCanMove = false;
-            let blueCanMove = false;
+            let redHasFlag = false, blueHasFlag = false;
+            let redCanMove = false, blueCanMove = false;
             
             for (let i = 0; i < 5; i++) {
                 for (let j = 0; j < 12; j++) {
@@ -609,26 +639,22 @@
                 }
             }
             
-            if (!redHasFlag) {
+            if (!redHasFlag || !redCanMove) {
                 endGame(player1Color === 'blue' ? '玩家 1' : '玩家 2');
-            } else if (!blueHasFlag) {
-                endGame(player1Color === 'red' ? '玩家 1' : '玩家 2');
-            } else if (!redCanMove) {
-                endGame(player1Color === 'blue' ? '玩家 1' : '玩家 2');
-            } else if (!blueCanMove) {
+            } else if (!blueHasFlag || !blueCanMove) {
                 endGame(player1Color === 'red' ? '玩家 1' : '玩家 2');
             }
         }
         
-        // 更新单元格显示
         function updateCellDisplay(row, col) {
             const cell = board[row][col];
             const el = cell.element;
             
             el.className = 'cell';
-            
-            if (isCamp(row, col)) el.classList.add('camp');
-            else if (isBase(row, col)) el.classList.add('base');
+            if (cell.type === 'camp') el.classList.add('camp');
+            else if (cell.type === 'base') el.classList.add('base');
+            else if (cell.type === 'mountain') el.classList.add('mountain');
+            else if (cell.type === 'railway') el.classList.add('railway');
             
             if (!cell.revealed || !cell.piece) {
                 el.classList.add('back');
@@ -639,7 +665,6 @@
             }
         }
         
-        // 更新游戏信息
         function updateGameInfo() {
             const playerEl = document.getElementById('currentPlayer');
             if (!currentPlayer) {
@@ -650,16 +675,13 @@
             const currentName = currentPlayer === player1Color ? '玩家 1' : '玩家 2';
             const colorText = currentPlayer === 'red' ? '🔴 红方' : '🔵 蓝方';
             playerEl.textContent = `${colorText}（${currentName}）回合`;
-            playerEl.style.color = currentPlayer === 'red' ? '#ff6b6b' : '#4a90d9';
         }
         
-        // 结束游戏
         function endGame(winner) {
             document.getElementById('winnerText').textContent = `🎉 ${winner}获胜！`;
             document.getElementById('gameOverModal').style.display = 'flex';
         }
         
-        // 新游戏
         function newGame() {
             closeModal('gameOverModal');
             closeModal('shareModal');
@@ -670,40 +692,31 @@
             firstFlip = true;
             player1Color = null;
             player2Color = null;
-            redFlagPos = null;
-            blueFlagPos = null;
             
             initBoard();
             setupPieces();
             document.getElementById('currentPlayer').textContent = '点击棋子开始游戏';
         }
         
-        // 显示分享模态框
         function showShareModal() {
-            const link = window.location.href;
-            document.getElementById('shareLink').textContent = link;
+            document.getElementById('shareLink').textContent = window.location.href;
             document.getElementById('shareModal').style.display = 'flex';
         }
         
-        // 复制链接
         function copyLink() {
-            const link = document.getElementById('shareLink').textContent;
-            navigator.clipboard.writeText(link).then(() => {
-                alert('链接已复制！发送给 QQ 好友即可邀请对战');
+            navigator.clipboard.writeText(document.getElementById('shareLink').textContent).then(() => {
+                alert('链接已复制！');
             });
         }
         
-        // 关闭模态框
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
         }
         
-        // 显示规则
         function showRules() {
             document.getElementById('rulesModal').style.display = 'flex';
         }
         
-        // 初始化游戏
         newGame();
     </script>
 </body>
