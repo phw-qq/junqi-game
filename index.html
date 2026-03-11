@@ -26,20 +26,19 @@
         }
         .current-player { font-size: 1.1em; font-weight: bold; color: #ffd700; }
         
-        /* 棋盘背景 - 仿木质 */
         .board-frame {
             background: linear-gradient(180deg, #8B7355 0%, #5C4033 100%);
-            padding: 20px;
+            padding: 15px;
             border-radius: 12px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.6);
             border: 4px solid #3d2817;
         }
         
-        /* 棋盘主体 */
+        /* 标准军棋棋盘：10 行 12 列 */
         .board {
             display: grid;
             grid-template-columns: repeat(12, 1fr);
-            grid-template-rows: repeat(5, 1fr);
+            grid-template-rows: repeat(10, 1fr);
             gap: 2px;
             background: #4a3728;
             padding: 8px;
@@ -47,10 +46,10 @@
         }
         
         .cell {
-            width: 38px;
-            height: 38px;
-            min-width: 38px;
-            min-height: 38px;
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            min-height: 32px;
             background: #d4c4a8;
             border: 1px solid #8b7355;
             display: flex;
@@ -58,22 +57,15 @@
             justify-content: center;
             cursor: pointer;
             font-weight: bold;
-            font-size: 15px;
+            font-size: 13px;
             user-select: none;
             position: relative;
             transition: all 0.2s;
         }
         
-        /* 铁路线 - 上下两行 */
+        /* 铁路线 */
         .cell.railway {
-            background: repeating-linear-gradient(
-                90deg,
-                #e8dcc8 0px,
-                #e8dcc8 8px,
-                #c4b494 8px,
-                #c4b494 10px
-            );
-            border: 1px solid #8b7355;
+            background: repeating-linear-gradient(90deg, #e8dcc8 0px, #e8dcc8 6px, #c4b494 6px, #c4b494 8px);
         }
         
         /* 行营 - 圆形 */
@@ -81,13 +73,14 @@
             background: radial-gradient(circle, #a8d8a8 0%, #78b878 100%);
             border-radius: 50%;
             border: 3px solid #589858;
-            width: 34px;
-            height: 34px;
-            min-width: 34px;
-            min-height: 34px;
+            width: 28px;
+            height: 28px;
+            min-width: 28px;
+            min-height: 28px;
+            margin: 2px;
         }
         
-        /* 大本营 - 军旗位 */
+        /* 大本营 */
         .cell.base {
             background: #c8b898;
             border: 3px double #8b7355;
@@ -95,24 +88,34 @@
         .cell.base::after {
             content: '★';
             position: absolute;
-            font-size: 12px;
+            font-size: 10px;
             color: #5c4033;
             top: 2px;
             right: 3px;
         }
         
+        /* 前线界 */
+        .cell.frontier {
+            background: #b8a888;
+            border: 2px solid #8b7355;
+        }
+        .cell.frontier::after {
+            content: '界';
+            font-size: 10px;
+            color: #5c4033;
+        }
+        
         /* 山地 */
         .cell.mountain {
             background: linear-gradient(135deg, #6b8b5c 0%, #4b6b3c 100%);
-            border: 1px solid #3b5b2c;
         }
         .cell.mountain::after {
             content: '⛰';
-            font-size: 18px;
+            font-size: 16px;
         }
         
         .cell:hover {
-            transform: scale(1.12);
+            transform: scale(1.15);
             box-shadow: 0 0 12px rgba(255,255,255,0.6);
             z-index: 10;
         }
@@ -122,13 +125,11 @@
             color: white;
             border-color: #cc0000;
         }
-        
         .cell.blue {
             background: linear-gradient(135deg, #4a90d9, #357abd) !important;
             color: white;
             border-color: #0066cc;
         }
-        
         .cell.back {
             background: linear-gradient(135deg, #8B4513, #A0522D);
             color: transparent;
@@ -137,12 +138,11 @@
         .cell.back::after {
             content: '军';
             color: rgba(255,255,255,0.35);
-            font-size: 18px;
+            font-size: 16px;
         }
-        
         .cell.selected {
             box-shadow: 0 0 18px #ffd700;
-            transform: scale(1.18);
+            transform: scale(1.2);
             z-index: 20;
             border: 3px solid #ffd700;
         }
@@ -154,7 +154,6 @@
             flex-wrap: wrap;
             justify-content: center;
         }
-        
         button {
             padding: 10px 20px;
             font-size: 14px;
@@ -211,10 +210,10 @@
             font-size: 13px;
         }
         
-        @media (max-width: 520px) {
-            .cell { width: 30px; height: 30px; min-width: 30px; min-height: 30px; font-size: 13px; }
-            .cell.camp { width: 26px; height: 26px; min-width: 26px; min-height: 26px; }
-            .board-frame { padding: 12px; }
+        @media (max-width: 450px) {
+            .cell { width: 24px; height: 24px; min-width: 24px; min-height: 24px; font-size: 11px; }
+            .cell.camp { width: 20px; height: 20px; min-width: 20px; min-height: 20px; }
+            .board-frame { padding: 8px; }
             .board { padding: 4px; gap: 1px; }
             h1 { font-size: 18px; }
         }
@@ -250,10 +249,11 @@
         <div class="modal-content">
             <h2>📜 游戏规则</h2>
             <p><strong>棋盘：</strong></p>
-            <p>🛤 铁路线（上下两行）- 工兵可任意移动</p>
-            <p>⭕ 行营（8 个圆圈）- 安全区</p>
-            <p>⭐ 大本营（4 个星位）- 军旗位</p>
-            <p>⛰ 山地（6 个）- 不可通行</p>
+            <p>🛤 铁路线 - 工兵可任意移动</p>
+            <p>⭕ 行营（12 个）- 安全区</p>
+            <p>⭐ 大本营（2 个）- 军旗位</p>
+            <p>⛰ 山地 - 不可通行</p>
+            <p>📍 前线界 - 中线分界</p>
             <br>
             <p><strong>棋子大小：</strong></p>
             <p>司令 > 军长 > 师长 > 旅长 > 团长 > 营长 > 连长 > 排长 > 工兵</p>
@@ -282,22 +282,32 @@
         let board = [], currentPlayer = null, player1Color = null, player2Color = null;
         let selectedCell = null, firstFlip = true;
         
-        // 标准军棋棋盘布局
-        const CAMP = [[1,2],[1,4],[1,7],[1,9],[3,2],[3,4],[3,7],[3,9]];
-        const BASE = [[0,1],[0,10],[4,1],[4,10]];
-        const MOUNTAIN = [[2,0],[2,11],[1,5],[1,6],[3,5],[3,6]];
+        // 10 行 12 列标准军棋棋盘
+        // 行营位置（12 个）- 顶部 6 个 + 底部 6 个，金字塔分布
+        const CAMPS_TOP = [[1,3],[1,4],[1,7],[1,8],[2,4],[2,7]];
+        const CAMPS_BOTTOM = [[7,4],[7,7],[8,3],[8,4],[8,7],[8,8]];
+        const CAMPS = [...CAMPS_TOP, ...CAMPS_BOTTOM];
         
-        const RAILWAY = [];
-        for (let j=0; j<12; j++) {
-            if (!BASE.some(p=>p[0]===0&&p[1]===j)) RAILWAY.push([0,j]);
-            if (!BASE.some(p=>p[0]===4&&p[1]===j)) RAILWAY.push([4,j]);
-        }
+        // 大本营（2 个）- 左右各一个
+        const BASES = [[0,5],[0,6]];
+        
+        // 前线界（中线）
+        const FRONTIERS = [[4,5],[4,6],[5,5],[5,6]];
+        
+        // 山地
+        const MOUNTAINS = [[2,2],[2,9],[7,2],[7,9]];
+        
+        // 铁路线（上下两行）
+        const RAILWAYS = [];
+        for(let j=0; j<12; j++) RAILWAYS.push([0,j]);
+        for(let j=0; j<12; j++) RAILWAYS.push([9,j]);
         
         function getType(r,c) {
-            if (CAMP.some(p=>p[0]===r&&p[1]===c)) return 'camp';
-            if (BASE.some(p=>p[0]===r&&p[1]===c)) return 'base';
-            if (MOUNTAIN.some(p=>p[0]===r&&p[1]===c)) return 'mountain';
-            if (RAILWAY.some(p=>p[0]===r&&p[1]===c)) return 'railway';
+            if (CAMPS.some(p=>p[0]===r&&p[1]===c)) return 'camp';
+            if (BASES.some(p=>p[0]===r&&p[1]===c)) return 'base';
+            if (FRONTIERS.some(p=>p[0]===r&&p[1]===c)) return 'frontier';
+            if (MOUNTAINS.some(p=>p[0]===r&&p[1]===c)) return 'mountain';
+            if (RAILWAYS.some(p=>p[0]===r&&p[1]===c)) return 'railway';
             return 'normal';
         }
         
@@ -305,12 +315,12 @@
             const boardEl = document.getElementById('board');
             boardEl.innerHTML = '';
             board = [];
-            for (let i=0; i<5; i++) {
+            for (let i=0; i<10; i++) {
                 board[i] = [];
                 for (let j=0; j<12; j++) {
                     const cell = document.createElement('div');
                     const t = getType(i,j);
-                    cell.className = 'cell' + (t==='camp'?' camp':t==='base'?' base':t==='mountain'?' mountain':t==='railway'?' railway':'');
+                    cell.className = 'cell' + (t==='camp'?' camp':t==='base'?' base':t==='frontier'?' frontier':t==='mountain'?' mountain':t==='railway'?' railway':'');
                     cell.dataset.row = i; cell.dataset.col = j;
                     cell.onclick = () => handleCellClick(i,j);
                     boardEl.appendChild(cell);
@@ -341,9 +351,9 @@
                 [pieces[i],pieces[j]] = [pieces[j],pieces[i]];
             }
             const positions = [];
-            for (let i=0; i<5; i++) for (let j=0; j<12; j++) {
+            for (let i=0; i<10; i++) for (let j=0; j<12; j++) {
                 const t = getType(i,j);
-                if (t!=='mountain' && t!=='camp') positions.push([i,j]);
+                if (t!=='mountain' && t!=='camp' && t!=='frontier') positions.push([i,j]);
             }
             for (let i=positions.length-1; i>0; i--) {
                 const j = Math.floor(Math.random()*(i+1));
@@ -357,7 +367,7 @@
         
         function handleCellClick(r,c) {
             const cell = board[r][c];
-            if (cell.type==='mountain') return;
+            if (cell.type==='mountain' || cell.type==='frontier') return;
             if (selectedCell) {
                 if (r===selectedCell.r && c===selectedCell.c) { clearSelection(); return; }
                 if (!cell.revealed) movePiece(selectedCell.r,selectedCell.c,r,c);
@@ -389,7 +399,7 @@
         
         function movePiece(fr,fc,tr,tc) {
             const from=board[fr][fc], to=board[tr][tc];
-            if (to.type==='mountain') { alert('山地不能走！'); return; }
+            if (to.type==='mountain' || to.type==='frontier') { alert('不能走到这里！'); return; }
             if (Math.abs(fr-tr)+Math.abs(fc-tc)!==1) { alert('只能走相邻位置！'); return; }
             to.piece=from.piece; to.revealed=true; from.piece=null; from.revealed=false;
             updateCellDisplay(fr,fc); updateCellDisplay(tr,tc); clearSelection();
@@ -401,8 +411,8 @@
         function attack(fr,fc,tr,tc) {
             const from=board[fr][fc], to=board[tr][tc];
             const atk=from.piece, def=to.piece;
-            if (to.type==='mountain') { alert('山地不能打！'); return; }
-            if (Math.abs(fr-tr)+Math.abs(fc-tc)!==1) { alert('只能打相邻位置！'); return; }
+            if (to.type==='mountain' || to.type==='frontier') { alert('不能攻击这里！'); return; }
+            if (Math.abs(fr-tr)+Math.abs(fc-tc)!==1) { alert('只能攻击相邻位置！'); return; }
             if (atk.type==='炸'||def.type==='炸') { from.piece=null; to.piece=null; }
             else if (def.type==='雷') { if(atk.type==='工'){to.piece=null;from.piece=atk;} else from.piece=null; }
             else if (def.type==='旗') { endGame(currentPlayer===player1Color?'玩家 1':'玩家 2'); return; }
@@ -420,7 +430,7 @@
         
         function checkWin() {
             let rf=false,bf=false,rm=false,bm=false;
-            for(let i=0;i<5;i++) for(let j=0;j<12;j++) {
+            for(let i=0;i<10;i++) for(let j=0;j<12;j++) {
                 const c=board[i][j];
                 if(c.revealed&&c.piece) {
                     if(c.piece.color==='red') { if(c.piece.type==='旗')rf=true; rm=true; }
@@ -436,6 +446,7 @@
             el.className='cell';
             if(cell.type==='camp')el.classList.add('camp');
             else if(cell.type==='base')el.classList.add('base');
+            else if(cell.type==='frontier')el.classList.add('frontier');
             else if(cell.type==='mountain')el.classList.add('mountain');
             else if(cell.type==='railway')el.classList.add('railway');
             if(!cell.revealed||!cell.piece) { el.classList.add('back'); el.textContent=''; }
