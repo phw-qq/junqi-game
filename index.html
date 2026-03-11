@@ -3,14 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>军棋翻翻棋 - 双人对弈</title>
+    <title>军棋翻翻棋 - 标准棋盘</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Microsoft YaHei', sans-serif;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
@@ -21,13 +16,7 @@
             padding: 10px;
             color: #fff;
         }
-        
-        h1 {
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-            font-size: 22px;
-        }
-        
+        h1 { margin-bottom: 10px; font-size: 22px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
         .game-info {
             background: rgba(255,255,255,0.1);
             padding: 12px 20px;
@@ -35,117 +24,96 @@
             margin-bottom: 10px;
             text-align: center;
         }
+        .current-player { font-size: 1.1em; font-weight: bold; color: #ffd700; }
         
-        .current-player {
-            font-size: 1.1em;
-            font-weight: bold;
-            color: #ffd700;
-        }
-        
-        /* 标准军棋棋盘容器 */
-        .board-container {
-            background: linear-gradient(180deg, #8B7355 0%, #6B5345 100%);
-            padding: 15px;
-            border-radius: 10px;
+        /* 棋盘背景 - 仿木质 */
+        .board-frame {
+            background: linear-gradient(180deg, #8B7355 0%, #5C4033 100%);
+            padding: 20px;
+            border-radius: 12px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-            border: 3px solid #4a3728;
+            border: 4px solid #3d2817;
         }
         
-        /* 标准军棋棋盘：5 行 12 列 */
+        /* 棋盘主体 */
         .board {
             display: grid;
             grid-template-columns: repeat(12, 1fr);
             grid-template-rows: repeat(5, 1fr);
-            gap: 1px;
-            background: #5a4635;
-            padding: 2px;
-            border-radius: 4px;
+            gap: 2px;
+            background: #4a3728;
+            padding: 8px;
+            border-radius: 6px;
         }
         
         .cell {
-            width: 36px;
-            height: 36px;
-            min-width: 36px;
-            min-height: 36px;
-            background: #c2b280;
+            width: 38px;
+            height: 38px;
+            min-width: 38px;
+            min-height: 38px;
+            background: #d4c4a8;
             border: 1px solid #8b7355;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.2s;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 15px;
             user-select: none;
             position: relative;
+            transition: all 0.2s;
         }
         
-        /* 铁路线 - 上下两行，中间有连线 */
+        /* 铁路线 - 上下两行 */
         .cell.railway {
-            background: linear-gradient(90deg, #d4c4a8 0%, #e8dcc8 50%, #d4c4a8 100%);
-            border: 1px dashed #8b7355;
+            background: repeating-linear-gradient(
+                90deg,
+                #e8dcc8 0px,
+                #e8dcc8 8px,
+                #c4b494 8px,
+                #c4b494 10px
+            );
+            border: 1px solid #8b7355;
         }
         
-        /* 铁路线中间部分（工兵可以拐弯）*/
-        .cell.railway-center {
-            background: linear-gradient(90deg, #d4c4a8 0%, #e8dcc8 50%, #d4c4a8 100%);
-            position: relative;
-        }
-        
-        .cell.railway-center::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: #8b7355;
-            transform: translateY(-50%);
-        }
-        
-        /* 行营 - 圆形安全区 */
+        /* 行营 - 圆形 */
         .cell.camp {
-            background: #a8c8a8;
+            background: radial-gradient(circle, #a8d8a8 0%, #78b878 100%);
             border-radius: 50%;
-            border: 2px solid #5a8b5a;
-            width: 32px;
-            height: 32px;
-            min-width: 32px;
-            min-height: 32px;
-            margin: 2px;
+            border: 3px solid #589858;
+            width: 34px;
+            height: 34px;
+            min-width: 34px;
+            min-height: 34px;
         }
         
-        /* 大本营 - 军旗位置 */
+        /* 大本营 - 军旗位 */
         .cell.base {
-            background: #b8a888;
-            border: 2px solid #8b7355;
-            position: relative;
+            background: #c8b898;
+            border: 3px double #8b7355;
         }
-        
         .cell.base::after {
             content: '★';
             position: absolute;
-            font-size: 10px;
-            color: #6b5345;
+            font-size: 12px;
+            color: #5c4033;
             top: 2px;
-            right: 2px;
+            right: 3px;
         }
         
-        /* 山地 - 不能通行 */
+        /* 山地 */
         .cell.mountain {
-            background: #6b7b5a;
-            border: 1px solid #4a5b3a;
+            background: linear-gradient(135deg, #6b8b5c 0%, #4b6b3c 100%);
+            border: 1px solid #3b5b2c;
         }
-        
         .cell.mountain::after {
             content: '⛰';
-            font-size: 16px;
-            color: #4a5b3a;
+            font-size: 18px;
         }
         
         .cell:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+            transform: scale(1.12);
+            box-shadow: 0 0 12px rgba(255,255,255,0.6);
             z-index: 10;
         }
         
@@ -166,16 +134,15 @@
             color: transparent;
             border-color: #654321;
         }
-        
         .cell.back::after {
             content: '军';
-            color: rgba(255,255,255,0.3);
-            font-size: 16px;
+            color: rgba(255,255,255,0.35);
+            font-size: 18px;
         }
         
         .cell.selected {
-            box-shadow: 0 0 15px #ffd700;
-            transform: scale(1.15);
+            box-shadow: 0 0 18px #ffd700;
+            transform: scale(1.18);
             z-index: 20;
             border: 3px solid #ffd700;
         }
@@ -194,25 +161,21 @@
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            transition: all 0.3s;
             font-weight: bold;
+            transition: all 0.3s;
         }
-        
         .btn-primary {
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
         }
-        
         .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(102,126,234,0.4);
         }
-        
         .btn-secondary {
             background: linear-gradient(135deg, #f093fb, #f5576c);
             color: white;
         }
-        
         .btn-secondary:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(245,87,108,0.4);
@@ -221,31 +184,23 @@
         .modal {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background: rgba(0,0,0,0.8);
             justify-content: center;
             align-items: center;
             z-index: 1000;
         }
-        
         .modal-content {
             background: linear-gradient(135deg, #1a1a2e, #16213e);
             padding: 30px;
             border-radius: 12px;
             text-align: center;
-            max-width: 380px;
+            max-width: 400px;
             margin: 20px;
         }
-        
-        .modal h2 {
-            margin-bottom: 15px;
-            color: #ffd700;
-            font-size: 20px;
-        }
-        
+        .modal h2 { margin-bottom: 15px; color: #ffd700; font-size: 20px; }
+        .modal p { margin: 10px 0; line-height: 1.6; }
         .share-link {
             background: rgba(255,255,255,0.1);
             padding: 12px;
@@ -256,40 +211,22 @@
             font-size: 13px;
         }
         
-        @media (max-width: 500px) {
-            .cell {
-                width: 28px;
-                height: 28px;
-                min-width: 28px;
-                min-height: 28px;
-                font-size: 12px;
-            }
-            
-            .cell.camp {
-                width: 24px;
-                height: 24px;
-                min-width: 24px;
-                min-height: 24px;
-            }
-            
-            .board-container {
-                padding: 8px;
-            }
-            
-            h1 {
-                font-size: 18px;
-            }
+        @media (max-width: 520px) {
+            .cell { width: 30px; height: 30px; min-width: 30px; min-height: 30px; font-size: 13px; }
+            .cell.camp { width: 26px; height: 26px; min-width: 26px; min-height: 26px; }
+            .board-frame { padding: 12px; }
+            .board { padding: 4px; gap: 1px; }
+            h1 { font-size: 18px; }
         }
     </style>
 </head>
 <body>
     <h1>🎖️ 军棋翻翻棋</h1>
-    
     <div class="game-info">
         <div class="current-player" id="currentPlayer">点击棋子开始游戏</div>
     </div>
     
-    <div class="board-container">
+    <div class="board-frame">
         <div class="board" id="board"></div>
     </div>
     
@@ -299,7 +236,6 @@
         <button class="btn-primary" onclick="showRules()">规则</button>
     </div>
     
-    <!-- 分享模态框 -->
     <div class="modal" id="shareModal">
         <div class="modal-content">
             <h2>🎮 邀请好友</h2>
@@ -310,15 +246,14 @@
         </div>
     </div>
     
-    <!-- 规则模态框 -->
     <div class="modal" id="rulesModal">
         <div class="modal-content">
             <h2>📜 游戏规则</h2>
-            <p><strong>棋盘说明：</strong></p>
-            <p>🛤 铁路线：上下两行，工兵可任意移动</p>
-            <p>⭕ 行营：圆形安全区，8 个位置</p>
-            <p>⭐ 大本营：军旗必须放在这里</p>
-            <p>⛰ 山地：不能通行</p>
+            <p><strong>棋盘：</strong></p>
+            <p>🛤 铁路线（上下两行）- 工兵可任意移动</p>
+            <p>⭕ 行营（8 个圆圈）- 安全区</p>
+            <p>⭐ 大本营（4 个星位）- 军旗位</p>
+            <p>⛰ 山地（6 个）- 不可通行</p>
             <br>
             <p><strong>棋子大小：</strong></p>
             <p>司令 > 军长 > 师长 > 旅长 > 团长 > 营长 > 连长 > 排长 > 工兵</p>
@@ -326,11 +261,10 @@
             <p>🔸 炸弹：同归于尽</p>
             <p>🔸 地雷：只能工兵挖</p>
             <p>🔸 军旗：被扛走就输</p>
-            <button class="btn-primary" onclick="closeModal('rulesModal')" style="margin-top: 15px;">知道了</button>
+            <button class="btn-primary" onclick="closeModal('rulesModal')" style="margin-top:15px;">知道了</button>
         </div>
     </div>
     
-    <!-- 游戏结束模态框 -->
     <div class="modal" id="gameOverModal">
         <div class="modal-content">
             <h2 id="winnerText">🎉 游戏结束</h2>
@@ -345,49 +279,25 @@
             '连': 4, '排': 3, '工': 2, '炸': 99, '雷': 1, '旗': 0
         };
         
-        let board = [];
-        let currentPlayer = null;
-        let player1Color = null;
-        let player2Color = null;
-        let selectedCell = null;
-        let firstFlip = true;
+        let board = [], currentPlayer = null, player1Color = null, player2Color = null;
+        let selectedCell = null, firstFlip = true;
         
-        // 标准军棋棋盘布局（5 行 12 列）
-        // 行营位置
-        const CAMP_POSITIONS = [
-            {row: 1, col: 2}, {row: 1, col: 4}, {row: 1, col: 7}, {row: 1, col: 9},
-            {row: 3, col: 2}, {row: 3, col: 4}, {row: 3, col: 7}, {row: 3, col: 9}
-        ];
+        // 标准军棋棋盘布局
+        const CAMP = [[1,2],[1,4],[1,7],[1,9],[3,2],[3,4],[3,7],[3,9]];
+        const BASE = [[0,1],[0,10],[4,1],[4,10]];
+        const MOUNTAIN = [[2,0],[2,11],[1,5],[1,6],[3,5],[3,6]];
         
-        // 大本营位置（军旗位）
-        const BASE_POSITIONS = [
-            {row: 0, col: 1}, {row: 0, col: 10},
-            {row: 4, col: 1}, {row: 4, col: 10}
-        ];
-        
-        // 山地位置（不能通行）
-        const MOUNTAIN_POSITIONS = [
-            {row: 2, col: 0}, {row: 2, col: 11},
-            {row: 1, col: 5}, {row: 1, col: 6},
-            {row: 3, col: 5}, {row: 3, col: 6}
-        ];
-        
-        // 铁路线位置（上下两行，除去大本营和山地）
-        const RAILWAY_POSITIONS = [];
-        for (let j = 0; j < 12; j++) {
-            if (!BASE_POSITIONS.some(p => p.row === 0 && p.col === j)) {
-                RAILWAY_POSITIONS.push({row: 0, col: j});
-            }
-            if (!BASE_POSITIONS.some(p => p.row === 4 && p.col === j)) {
-                RAILWAY_POSITIONS.push({row: 4, col: j});
-            }
+        const RAILWAY = [];
+        for (let j=0; j<12; j++) {
+            if (!BASE.some(p=>p[0]===0&&p[1]===j)) RAILWAY.push([0,j]);
+            if (!BASE.some(p=>p[0]===4&&p[1]===j)) RAILWAY.push([4,j]);
         }
         
-        function getCellType(row, col) {
-            if (CAMP_POSITIONS.some(p => p.row === row && p.col === col)) return 'camp';
-            if (BASE_POSITIONS.some(p => p.row === row && p.col === col)) return 'base';
-            if (MOUNTAIN_POSITIONS.some(p => p.row === row && p.col === col)) return 'mountain';
-            if (RAILWAY_POSITIONS.some(p => p.row === row && p.col === col)) return 'railway';
+        function getType(r,c) {
+            if (CAMP.some(p=>p[0]===r&&p[1]===c)) return 'camp';
+            if (BASE.some(p=>p[0]===r&&p[1]===c)) return 'base';
+            if (MOUNTAIN.some(p=>p[0]===r&&p[1]===c)) return 'mountain';
+            if (RAILWAY.some(p=>p[0]===r&&p[1]===c)) return 'railway';
             return 'normal';
         }
         
@@ -395,327 +305,167 @@
             const boardEl = document.getElementById('board');
             boardEl.innerHTML = '';
             board = [];
-            
-            for (let i = 0; i < 5; i++) {
+            for (let i=0; i<5; i++) {
                 board[i] = [];
-                for (let j = 0; j < 12; j++) {
+                for (let j=0; j<12; j++) {
                     const cell = document.createElement('div');
-                    const cellType = getCellType(i, j);
-                    
-                    cell.className = 'cell';
-                    if (cellType === 'camp') cell.classList.add('camp');
-                    else if (cellType === 'base') cell.classList.add('base');
-                    else if (cellType === 'mountain') cell.classList.add('mountain');
-                    else if (cellType === 'railway') cell.classList.add('railway');
-                    
-                    cell.dataset.row = i;
-                    cell.dataset.col = j;
-                    cell.onclick = () => handleCellClick(i, j);
+                    const t = getType(i,j);
+                    cell.className = 'cell' + (t==='camp'?' camp':t==='base'?' base':t==='mountain'?' mountain':t==='railway'?' railway':'');
+                    cell.dataset.row = i; cell.dataset.col = j;
+                    cell.onclick = () => handleCellClick(i,j);
                     boardEl.appendChild(cell);
-                    board[i][j] = { element: cell, piece: null, revealed: false, type: cellType };
+                    board[i][j] = {element:cell, piece:null, revealed:false, type:t};
                 }
             }
         }
         
         function setupPieces() {
             const pieces = [
-                { type: '司', color: 'red' }, { type: '军', color: 'red' },
-                { type: '师', color: 'red' }, { type: '师', color: 'red' },
-                { type: '旅', color: 'red' }, { type: '旅', color: 'red' },
-                { type: '团', color: 'red' }, { type: '团', color: 'red' },
-                { type: '营', color: 'red' }, { type: '营', color: 'red' },
-                { type: '连', color: 'red' }, { type: '连', color: 'red' }, { type: '连', color: 'red' },
-                { type: '排', color: 'red' }, { type: '排', color: 'red' }, { type: '排', color: 'red' },
-                { type: '工', color: 'red' }, { type: '工', color: 'red' }, { type: '工', color: 'red' },
-                { type: '炸', color: 'red' }, { type: '炸', color: 'red' },
-                { type: '雷', color: 'red' }, { type: '雷', color: 'red' }, { type: '雷', color: 'red' },
-                { type: '旗', color: 'red' },
-                { type: '司', color: 'blue' }, { type: '军', color: 'blue' },
-                { type: '师', color: 'blue' }, { type: '师', color: 'blue' },
-                { type: '旅', color: 'blue' }, { type: '旅', color: 'blue' },
-                { type: '团', color: 'blue' }, { type: '团', color: 'blue' },
-                { type: '营', color: 'blue' }, { type: '营', color: 'blue' },
-                { type: '连', color: 'blue' }, { type: '连', color: 'blue' }, { type: '连', color: 'blue' },
-                { type: '排', color: 'blue' }, { type: '排', color: 'blue' }, { type: '排', color: 'blue' },
-                { type: '工', color: 'blue' }, { type: '工', color: 'blue' }, { type: '工', color: 'blue' },
-                { type: '炸', color: 'blue' }, { type: '炸', color: 'blue' },
-                { type: '雷', color: 'blue' }, { type: '雷', color: 'blue' }, { type: '雷', color: 'blue' },
-                { type: '旗', color: 'blue' }
+                {type:'司',color:'red'},{type:'军',color:'red'},{type:'师',color:'red'},{type:'师',color:'red'},
+                {type:'旅',color:'red'},{type:'旅',color:'red'},{type:'团',color:'red'},{type:'团',color:'red'},
+                {type:'营',color:'red'},{type:'营',color:'red'},{type:'连',color:'red'},{type:'连',color:'red'},{type:'连',color:'red'},
+                {type:'排',color:'red'},{type:'排',color:'red'},{type:'排',color:'red'},
+                {type:'工',color:'red'},{type:'工',color:'red'},{type:'工',color:'red'},
+                {type:'炸',color:'red'},{type:'炸',color:'red'},
+                {type:'雷',color:'red'},{type:'雷',color:'red'},{type:'雷',color:'red'},{type:'旗',color:'red'},
+                {type:'司',color:'blue'},{type:'军',color:'blue'},{type:'师',color:'blue'},{type:'师',color:'blue'},
+                {type:'旅',color:'blue'},{type:'旅',color:'blue'},{type:'团',color:'blue'},{type:'团',color:'blue'},
+                {type:'营',color:'blue'},{type:'营',color:'blue'},{type:'连',color:'blue'},{type:'连',color:'blue'},{type:'连',color:'blue'},
+                {type:'排',color:'blue'},{type:'排',color:'blue'},{type:'排',color:'blue'},
+                {type:'工',color:'blue'},{type:'工',color:'blue'},{type:'工',color:'blue'},
+                {type:'炸',color:'blue'},{type:'炸',color:'blue'},
+                {type:'雷',color:'blue'},{type:'雷',color:'blue'},{type:'雷',color:'blue'},{type:'旗',color:'blue'}
             ];
-            
-            for (let i = pieces.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [pieces[i], pieces[j]] = [pieces[j], pieces[i]];
+            for (let i=pieces.length-1; i>0; i--) {
+                const j = Math.floor(Math.random()*(i+1));
+                [pieces[i],pieces[j]] = [pieces[j],pieces[i]];
             }
-            
             const positions = [];
-            for (let i = 0; i < 5; i++) {
-                for (let j = 0; j < 12; j++) {
-                    const type = getCellType(i, j);
-                    if (type !== 'mountain' && type !== 'camp') {
-                        positions.push({row: i, col: j});
-                    }
-                }
+            for (let i=0; i<5; i++) for (let j=0; j<12; j++) {
+                const t = getType(i,j);
+                if (t!=='mountain' && t!=='camp') positions.push([i,j]);
             }
-            
-            for (let i = positions.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [positions[i], positions[j]] = [positions[j], positions[i]];
+            for (let i=positions.length-1; i>0; i--) {
+                const j = Math.floor(Math.random()*(i+1));
+                [positions[i],positions[j]] = [positions[j],positions[i]];
             }
-            
-            for (let i = 0; i < pieces.length; i++) {
-                const pos = positions[i];
-                board[pos.row][pos.col].piece = pieces[i];
+            for (let i=0; i<pieces.length; i++) {
+                const [r,c] = positions[i];
+                board[r][c].piece = pieces[i];
             }
         }
         
-        function handleCellClick(row, col) {
-            const cell = board[row][col];
-            
-            if (cell.type === 'mountain') return;
-            
+        function handleCellClick(r,c) {
+            const cell = board[r][c];
+            if (cell.type==='mountain') return;
             if (selectedCell) {
-                if (row === selectedCell.row && col === selectedCell.col) {
-                    clearSelection();
-                    return;
-                }
-                
-                if (!cell.revealed) {
-                    movePiece(selectedCell.row, selectedCell.col, row, col);
-                } else if (cell.piece && cell.piece.color !== currentPlayer) {
-                    attack(selectedCell.row, selectedCell.col, row, col);
-                }
+                if (r===selectedCell.r && c===selectedCell.c) { clearSelection(); return; }
+                if (!cell.revealed) movePiece(selectedCell.r,selectedCell.c,r,c);
+                else if (cell.piece && cell.piece.color!==currentPlayer) attack(selectedCell.r,selectedCell.c,r,c);
                 return;
             }
-            
-            if (!cell.revealed && cell.piece) {
-                flipPiece(row, col);
-            } else if (cell.revealed && cell.piece && cell.piece.color === currentPlayer) {
-                selectPiece(row, col);
-            }
+            if (!cell.revealed && cell.piece) flipPiece(r,c);
+            else if (cell.revealed && cell.piece && cell.piece.color===currentPlayer) selectPiece(r,c);
         }
         
-        function flipPiece(row, col) {
-            const cell = board[row][col];
+        function flipPiece(r,c) {
+            const cell = board[r][c];
             cell.revealed = true;
-            updateCellDisplay(row, col);
-            
+            updateCellDisplay(r,c);
             if (firstFlip) {
                 player1Color = cell.piece.color;
-                player2Color = cell.piece.color === 'red' ? 'blue' : 'red';
+                player2Color = cell.piece.color==='red'?'blue':'red';
                 currentPlayer = player1Color;
                 firstFlip = false;
-                document.getElementById('currentPlayer').textContent = 
-                    `${player1Color === 'red' ? '🔴 红方' : '🔵 蓝方'}先手，继续回合`;
+                document.getElementById('currentPlayer').textContent = `${player1Color==='red'?'🔴红方':'🔵蓝方'}先手，继续回合`;
                 return;
             }
-            
-            currentPlayer = currentPlayer === player1Color ? player2Color : player1Color;
+            currentPlayer = currentPlayer===player1Color?player2Color:player1Color;
             updateGameInfo();
         }
         
-        function selectPiece(row, col) {
-            clearSelection();
-            selectedCell = { row, col };
-            board[row][col].element.classList.add('selected');
-        }
+        function selectPiece(r,c) { clearSelection(); selectedCell={r,c}; board[r][c].element.classList.add('selected'); }
+        function clearSelection() { if(selectedCell) { board[selectedCell.r][selectedCell.c].element.classList.remove('selected'); selectedCell=null; } }
         
-        function clearSelection() {
-            if (selectedCell) {
-                board[selectedCell.row][selectedCell.col].element.classList.remove('selected');
-                selectedCell = null;
-            }
-        }
-        
-        function movePiece(fromRow, fromCol, toRow, toCol) {
-            const fromCell = board[fromRow][fromCol];
-            const toCell = board[toRow][toCol];
-            
-            if (toCell.type === 'mountain') {
-                alert('山地不能通行！');
-                return;
-            }
-            
-            const diffRow = Math.abs(fromRow - toRow);
-            const diffCol = Math.abs(fromCol - toCol);
-            
-            if (diffRow + diffCol !== 1) {
-                alert('只能移动到相邻的位置！');
-                return;
-            }
-            
-            toCell.piece = fromCell.piece;
-            toCell.revealed = true;
-            fromCell.piece = null;
-            fromCell.revealed = false;
-            
-            updateCellDisplay(fromRow, fromCol);
-            updateCellDisplay(toRow, toCol);
-            
-            clearSelection();
-            
-            if (toCell.piece.type === '旗') {
-                endGame(currentPlayer === player1Color ? '玩家 1' : '玩家 2');
-                return;
-            }
-            
-            currentPlayer = currentPlayer === player1Color ? player2Color : player1Color;
+        function movePiece(fr,fc,tr,tc) {
+            const from=board[fr][fc], to=board[tr][tc];
+            if (to.type==='mountain') { alert('山地不能走！'); return; }
+            if (Math.abs(fr-tr)+Math.abs(fc-tc)!==1) { alert('只能走相邻位置！'); return; }
+            to.piece=from.piece; to.revealed=true; from.piece=null; from.revealed=false;
+            updateCellDisplay(fr,fc); updateCellDisplay(tr,tc); clearSelection();
+            if (to.piece.type==='旗') { endGame(currentPlayer===player1Color?'玩家 1':'玩家 2'); return; }
+            currentPlayer=currentPlayer===player1Color?player2Color:player1Color;
             updateGameInfo();
         }
         
-        function attack(fromRow, fromCol, toRow, toCol) {
-            const fromCell = board[fromRow][fromCol];
-            const toCell = board[toRow][toCol];
-            const attacker = fromCell.piece;
-            const defender = toCell.piece;
-            
-            if (toCell.type === 'mountain') {
-                alert('山地不能攻击！');
-                return;
+        function attack(fr,fc,tr,tc) {
+            const from=board[fr][fc], to=board[tr][tc];
+            const atk=from.piece, def=to.piece;
+            if (to.type==='mountain') { alert('山地不能打！'); return; }
+            if (Math.abs(fr-tr)+Math.abs(fc-tc)!==1) { alert('只能打相邻位置！'); return; }
+            if (atk.type==='炸'||def.type==='炸') { from.piece=null; to.piece=null; }
+            else if (def.type==='雷') { if(atk.type==='工'){to.piece=null;from.piece=atk;} else from.piece=null; }
+            else if (def.type==='旗') { endGame(currentPlayer===player1Color?'玩家 1':'玩家 2'); return; }
+            else {
+                const ar=PIECE_RANK[atk.type], dr=PIECE_RANK[def.type];
+                if (ar>dr) { to.piece=atk; from.piece=null; }
+                else if (ar<dr) from.piece=null;
+                else { from.piece=null; to.piece=null; }
             }
-            
-            const diffRow = Math.abs(fromRow - toRow);
-            const diffCol = Math.abs(fromCol - toCol);
-            
-            if (diffRow + diffCol !== 1) {
-                alert('只能攻击相邻的棋子！');
-                return;
-            }
-            
-            if (attacker.type === '炸' || defender.type === '炸') {
-                fromCell.piece = null;
-                toCell.piece = null;
-            } else if (defender.type === '雷') {
-                if (attacker.type === '工') {
-                    toCell.piece = null;
-                    fromCell.piece = attacker;
-                } else {
-                    fromCell.piece = null;
-                }
-            } else if (defender.type === '旗') {
-                endGame(currentPlayer === player1Color ? '玩家 1' : '玩家 2');
-                return;
-            } else {
-                const attackerRank = PIECE_RANK[attacker.type];
-                const defenderRank = PIECE_RANK[defender.type];
-                
-                if (attackerRank > defenderRank) {
-                    toCell.piece = attacker;
-                    fromCell.piece = null;
-                } else if (attackerRank < defenderRank) {
-                    fromCell.piece = null;
-                } else {
-                    fromCell.piece = null;
-                    toCell.piece = null;
-                }
-            }
-            
-            updateCellDisplay(fromRow, fromCol);
-            updateCellDisplay(toRow, toCol);
-            
-            clearSelection();
-            checkWinCondition();
-            
-            currentPlayer = currentPlayer === player1Color ? player2Color : player1Color;
+            updateCellDisplay(fr,fc); updateCellDisplay(tr,tc); clearSelection();
+            checkWin();
+            currentPlayer=currentPlayer===player1Color?player2Color:player1Color;
             updateGameInfo();
         }
         
-        function checkWinCondition() {
-            let redHasFlag = false, blueHasFlag = false;
-            let redCanMove = false, blueCanMove = false;
-            
-            for (let i = 0; i < 5; i++) {
-                for (let j = 0; j < 12; j++) {
-                    const cell = board[i][j];
-                    if (cell.revealed && cell.piece) {
-                        if (cell.piece.color === 'red') {
-                            if (cell.piece.type === '旗') redHasFlag = true;
-                            redCanMove = true;
-                        } else {
-                            if (cell.piece.type === '旗') blueHasFlag = true;
-                            blueCanMove = true;
-                        }
-                    }
+        function checkWin() {
+            let rf=false,bf=false,rm=false,bm=false;
+            for(let i=0;i<5;i++) for(let j=0;j<12;j++) {
+                const c=board[i][j];
+                if(c.revealed&&c.piece) {
+                    if(c.piece.color==='red') { if(c.piece.type==='旗')rf=true; rm=true; }
+                    else { if(c.piece.type==='旗')bf=true; bm=true; }
                 }
             }
-            
-            if (!redHasFlag || !redCanMove) {
-                endGame(player1Color === 'blue' ? '玩家 1' : '玩家 2');
-            } else if (!blueHasFlag || !blueCanMove) {
-                endGame(player1Color === 'red' ? '玩家 1' : '玩家 2');
-            }
+            if(!rf||!rm) endGame(player1Color==='blue'?'玩家 1':'玩家 2');
+            else if(!bf||!bm) endGame(player1Color==='red'?'玩家 1':'玩家 2');
         }
         
-        function updateCellDisplay(row, col) {
-            const cell = board[row][col];
-            const el = cell.element;
-            
-            el.className = 'cell';
-            if (cell.type === 'camp') el.classList.add('camp');
-            else if (cell.type === 'base') el.classList.add('base');
-            else if (cell.type === 'mountain') el.classList.add('mountain');
-            else if (cell.type === 'railway') el.classList.add('railway');
-            
-            if (!cell.revealed || !cell.piece) {
-                el.classList.add('back');
-                el.textContent = '';
-            } else {
-                el.classList.add(cell.piece.color);
-                el.textContent = cell.piece.type;
-            }
+        function updateCellDisplay(r,c) {
+            const cell=board[r][c], el=cell.element;
+            el.className='cell';
+            if(cell.type==='camp')el.classList.add('camp');
+            else if(cell.type==='base')el.classList.add('base');
+            else if(cell.type==='mountain')el.classList.add('mountain');
+            else if(cell.type==='railway')el.classList.add('railway');
+            if(!cell.revealed||!cell.piece) { el.classList.add('back'); el.textContent=''; }
+            else { el.classList.add(cell.piece.color); el.textContent=cell.piece.type; }
         }
         
         function updateGameInfo() {
-            const playerEl = document.getElementById('currentPlayer');
-            if (!currentPlayer) {
-                playerEl.textContent = '点击棋子开始游戏';
-                return;
-            }
-            
-            const currentName = currentPlayer === player1Color ? '玩家 1' : '玩家 2';
-            const colorText = currentPlayer === 'red' ? '🔴 红方' : '🔵 蓝方';
-            playerEl.textContent = `${colorText}（${currentName}）回合`;
+            const el=document.getElementById('currentPlayer');
+            if(!currentPlayer) { el.textContent='点击棋子开始游戏'; return; }
+            const nm=currentPlayer===player1Color?'玩家 1':'玩家 2';
+            const ct=currentPlayer==='red'?'🔴红方':'🔵蓝方';
+            el.textContent=`${ct}（${nm}）回合`;
         }
         
         function endGame(winner) {
-            document.getElementById('winnerText').textContent = `🎉 ${winner}获胜！`;
-            document.getElementById('gameOverModal').style.display = 'flex';
+            document.getElementById('winnerText').textContent=`🎉 ${winner}获胜！`;
+            document.getElementById('gameOverModal').style.display='flex';
         }
         
         function newGame() {
-            closeModal('gameOverModal');
-            closeModal('shareModal');
-            closeModal('rulesModal');
-            
-            currentPlayer = null;
-            selectedCell = null;
-            firstFlip = true;
-            player1Color = null;
-            player2Color = null;
-            
-            initBoard();
-            setupPieces();
-            document.getElementById('currentPlayer').textContent = '点击棋子开始游戏';
+            closeModal('gameOverModal');closeModal('shareModal');closeModal('rulesModal');
+            currentPlayer=null;selectedCell=null;firstFlip=true;player1Color=null;player2Color=null;
+            initBoard();setupPieces();
+            document.getElementById('currentPlayer').textContent='点击棋子开始游戏';
         }
         
-        function showShareModal() {
-            document.getElementById('shareLink').textContent = window.location.href;
-            document.getElementById('shareModal').style.display = 'flex';
-        }
-        
-        function copyLink() {
-            navigator.clipboard.writeText(document.getElementById('shareLink').textContent).then(() => {
-                alert('链接已复制！');
-            });
-        }
-        
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-        
-        function showRules() {
-            document.getElementById('rulesModal').style.display = 'flex';
-        }
+        function showShareModal() { document.getElementById('shareLink').textContent=window.location.href; document.getElementById('shareModal').style.display='flex'; }
+        function copyLink() { navigator.clipboard.writeText(document.getElementById('shareLink').textContent).then(()=>alert('已复制！')); }
+        function closeModal(id) { document.getElementById(id).style.display='none'; }
+        function showRules() { document.getElementById('rulesModal').style.display='flex'; }
         
         newGame();
     </script>
