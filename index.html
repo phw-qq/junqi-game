@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>军棋翻翻棋 - 双人对弈</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: #fff;
+        }
+        
+        h1 {
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .game-info {
+            background: rgba(255,255,255,0.1);
+            padding: 15px 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .current-player {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #ffd700;
+        }
+        
+        .board {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 4px;
+            background: #2d5016;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-width: 100%;
+            overflow-x: auto;
+        }
+        
+        .cell {
+            width: 45px;
+            height: 45px;
+            background: #90EE90;
+            border: 2px solid #228B22;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            font-size: 14px;
+            user-select: none;
+        }
+        
+        .cell:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+        
+        .cell.red {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+            color: white;
+            border-color: #cc0000;
+        }
+        
+        .cell.blue {
+            background: linear-gradient(135deg, #4a90d9, #357abd);
+            color: white;
+            border-color: #0066cc;
+        }
+        
+        .cell.back {
+            background: linear-gradient(135deg, #8B4513, #A0522D);
+            color: transparent;
+            border-color: #654321;
+        }
+        
+        .cell.back::after {
+            content: '军';
+            color: rgba(255,255,255,0.3);
+            font-size: 20px;
+        }
+        
+        .cell.selected {
+            box-shadow: 0 0 15px #ffd700;
+            transform: scale(1.1);
+            z-index: 10;
+        }
+        
+        .cell.valid-move {
+            box-shadow: 0 0 10px #00ff00;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245,87,108,0.4);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 400px;
+        }
+        
+        .modal h2 {
+            margin-bottom: 20px;
+            color: #ffd700;
+        }
+        
+        .modal input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 16px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        
+        .share-link {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 600px) {
+            .cell {
+                width: 35px;
+                height: 35px;
+                font-size: 12px;
+            }
+            
+            .board {
+                gap: 2px;
+                padding: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>🎖️ 军棋翻翻棋</h1>
+    
+    <div class="game-info">
+        <div class="current-player" id="currentPlayer">红方回合</div>
+        <div id="gameStatus" style="margin-top: 10px;"></div>
+    </div>
+    
+    <div class="board" id="board"></div>
+    
+    <div class="controls">
+        <button class="btn-primary" onclick="newGame()">新游戏</button>
+        <button class="btn-secondary" onclick="showShareModal()">邀请好友</button>
+        <button class="btn-primary" onclick="showRules()">游戏规则</button>
+    </div>
+    
+    <!-- 分享模态框 -->
+    <div class="modal" id="shareModal">
+        <div class="modal-content">
+            <h2>🎮 邀请好友</h2>
+            <p>复制以下链接发送给 QQ 好友：</p>
+            <div class="share-link" id="shareLink"></div>
+            <button class="btn-primary" onclick="copyLink()">复制链接</button>
+            <button class="btn-secondary" onclick="closeModal('shareModal')">关闭</button>
+        </div>
+    </div>
+    
+    <!-- 规则模态框 -->
+    <div class="modal" id="rulesModal">
+        <div class="modal-content">
+            <h2>📜 游戏规则</h2>
+            <div style="text-align: left; font-size: 14px; line-height: 1.8;">
+                <p><strong>棋子大小：</strong></p>
+                <p>司令 > 军长 > 师长 > 旅长 > 团长 > 营长 > 连长 > 排长 > 工兵</p>
+                <br>
+                <p><strong>特殊规则：</strong></p>
+                <p>🔸 炸弹：与任何棋子相遇时同归于尽</p>
+                <p>🔸 地雷：只能被工兵挖掉，其他棋子撞地雷死亡</p>
+                <p>🔸 军旗：被对方扛走即输</p>
+                <br>
+                <p><strong>操作：</strong></p>
+                <p>点击棋子翻开或选择，再点击目标位置移动/攻击</p>
+            </div>
+            <button class="btn-primary" onclick="closeModal('rulesModal')" style="margin-top: 20px;">知道了</button>
+        </div>
+    </div>
+    
+    <!-- 游戏结束模态框 -->
+    <div class="modal" id="gameOverModal">
+        <div class="modal-content">
+            <h2 id="winnerText">🎉 游戏结束</h2>
+            <button class="btn-primary" onclick="newGame()">再来一局</button>
+            <button class="btn-secondary" onclick="closeModal('gameOverModal')">关闭</button>
+        </div>
+    </div>
+
+    <script>
+        // 棋子定义
+        const PIECES = {
+            RED: {
+                COMMANDER: '司', COLONEL: '军', MAJOR_GENERAL: '师', BRIGADIER: '旅',
+                COLONEL2: '团', MAJOR: '营', CAPTAIN: '连', LIEUTENANT: '排',
+                SERGEANT: '工', BOMB: '炸', MINE: '雷', FLAG: '旗'
+            },
+            BLUE: {
+                COMMANDER: '司', COLONEL: '军', MAJOR_GENERAL: '师', BRIGADIER: '旅',
+                COLONEL2: '团', MAJOR: '营', CAPTAIN: '连', LIEUTENANT: '排',
+                SERGEANT: '工', BOMB: '炸', MINE: '雷', FLAG: '旗'
+            }
+        };
+        
+        // 棋子大小等级（数字越大越强）
+        const PIECE_RANK = {
+            '司': 10, '军': 9, '师': 8, '旅': 7, '团': 6, '营': 5,
+            '连': 4, '排': 3, '工': 2, '炸': 99, '雷': 1, '旗': 0
+        };
+        
+        let board = [];
+        let currentPlayer = 'red';
+        let selectedCell = null;
+        let redPiecesLeft = 0;
+        let bluePiecesLeft = 0;
+        let redFlagPos = null;
+        let blueFlagPos = null;
+        
+        // 初始化棋盘
+        function initBoard() {
+            const boardEl = document.getElementById('board');
+            boardEl.innerHTML = '';
+            board = [];
+            
+            for (let i = 0; i < 8; i++) {
+                board[i] = [];
+                for (let j = 0; j < 12; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell back';
+                    cell.dataset.row = i;
+                    cell.dataset.col = j;
+                    cell.onclick = () => handleCellClick(i, j);
+                    boardEl.appendChild(cell);
+                    board[i][j] = { element: cell, piece: null, revealed: false };
+                }
+            }
+        }
+        
+        // 布置棋子
+        function setupPieces() {
+            const pieces = [
+                // 红方
+                { type: '司', color: 'red' }, { type: '军', color: 'red' },
+                { type: '师', color: 'red' }, { type: '师', color: 'red' },
+                { type: '旅', color: 'red' }, { type: '旅', color: 'red' },
+                { type: '团', color: 'red' }, { type: '团', color: 'red' },
+                { type: '营', color: 'red' }, { type: '营', color: 'red' },
+                { type: '连', color: 'red' }, { type: '连', color: 'red' },
+                { type: '连', color: 'red' }, { type: '排', color: 'red' },
+                { type: '排', color: 'red' }, { type: '排', color: 'red' },
+                { type: '工', color: 'red' }, { type: '工', color: 'red' },
+                { type: '工', color: 'red' }, { type: '炸', color: 'red' },
+                { type: '炸', color: 'red' }, { type: '雷', color: 'red' },
+                { type: '雷', color: 'red' }, { type: '雷', color: 'red' },
+                { type: '旗', color: 'red' },
+                // 蓝方
+                { type: '司', color: 'blue' }, { type: '军', color: 'blue' },
+                { type: '师', color: 'blue' }, { type: '师', color: 'blue' },
+                { type: '旅', color: 'blue' }, { type: '旅', color: 'blue' },
+                { type: '团', color: 'blue' }, { type: '团', color: 'blue' },
+                { type: '营', color: 'blue' }, { type: '营', color: 'blue' },
+                { type: '连', color: 'blue' }, { type: '连', color: 'blue' },
+                { type: '连', color: 'blue' }, { type: '排', color: 'blue' },
+                { type: '排', color: 'blue' }, { type: '排', color: 'blue' },
+                { type: '工', color: 'blue' }, { type: '工', color: 'blue' },
+                { type: '工', color: 'blue' }, { type: '炸', color: 'blue' },
+                { type: '炸', color: 'blue' }, { type: '雷', color: 'blue' },
+                { type: '雷', color: 'blue' }, { type: '雷', color: 'blue' },
+                { type: '旗', color: 'blue' }
+            ];
+            
+            // 洗牌
+            for (let i = pieces.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [pieces[i], pieces[j]] = [pieces[j], pieces[i]];
+            }
+            
+            // 放置棋子
+            let index = 0;
+            for (let i = 0; i < 8; i++) {
+                for (let j = 0; j < 12; j++) {
+                    if (index < pieces.length) {
+                        board[i][j].piece = pieces[index];
+                        if (pieces[index].type === '旗' && pieces[index].color === 'red') {
+                            redFlagPos = { row: i, col: j };
+                        }
+                        if (pieces[index].type === '旗' && pieces[index].color === 'blue') {
+                            blueFlagPos = { row: i, col: j };
+                        }
+                        index++;
+                    }
+                }
+            }
+            
+            redPiecesLeft = 25;
+            bluePiecesLeft = 25;
+        }
+        
+        // 处理点击
+        function handleCellClick(row, col) {
+            const cell = board[row][col];
+            
+            // 如果已选中棋子，尝试移动
+            if (selectedCell) {
+                if (row === selectedCell.row && col === selectedCell.col) {
+                    // 取消选择
+                    clearSelection();
+                    return;
+                }
+                
+                // 尝试移动或攻击
+                if (!cell.revealed) {
+                    // 移动到未翻开的位置
+                    movePiece(selectedCell.row, selectedCell.col, row, col);
+                } else if (cell.piece && cell.piece.color !== currentPlayer) {
+                    // 攻击对方棋子
+                    attack(selectedCell.row, selectedCell.col, row, col);
+                }
+                return;
+            }
+            
+            // 翻开棋子或选择己方棋子
+            if (!cell.revealed && cell.piece) {
+                flipPiece(row, col);
+            } else if (cell.revealed && cell.piece && cell.piece.color === currentPlayer) {
+                selectPiece(row, col);
+            }
+        }
+        
+        // 翻开棋子
+        function flipPiece(row, col) {
+            const cell = board[row][col];
+            cell.revealed = true;
+            updateCellDisplay(row, col);
+            
+            // 切换玩家
+            currentPlayer = currentPlayer === 'red' ? 'blue' : 'red';
+            updateGameInfo();
+        }
+        
+        // 选择棋子
+        function selectPiece(row, col) {
+            clearSelection();
+            selectedCell = { row, col };
+            board[row][col].element.classList.add('selected');
+        }
+        
+        // 清除选择
+        function clearSelection() {
+            if (selectedCell) {
+                board[selectedCell.row][selectedCell.col].element.classList.remove('selected');
+                selectedCell = null;
+            }
+        }
+        
+        // 移动棋子
+        function movePiece(fromRow, fromCol, toRow, toCol) {
+            const fromCell = board[fromRow][fromCol];
+            const toCell = board[toRow][toCol];
+            
+            // 检查是否是相邻移动（上下左右）
+            const diffRow = Math.abs(fromRow - toRow);
+            const diffCol = Math.abs(fromCol - toCol);
+            
+            if (diffRow + diffCol !== 1) {
+                alert('只能移动到相邻的位置！');
+                return;
+            }
+            
+            // 移动
+            toCell.piece = fromCell.piece;
+            toCell.revealed = true;
+            fromCell.piece = null;
+            fromCell.revealed = false;
+            
+            updateCellDisplay(fromRow, fromCol);
+            updateCellDisplay(toRow, toCol);
+            
+            clearSelection();
+            
+            // 检查是否扛旗
+            if (toCell.piece.type === '旗') {
+                endGame(currentPlayer === 'red' ? '蓝方' : '红方');
+                return;
+            }
+            
+            // 切换玩家
+            currentPlayer = currentPlayer === 'red' ? 'blue' : 'red';
+            updateGameInfo();
+        }
+        
+        // 攻击
+        function attack(fromRow, fromCol, toRow, toCol) {
+            const fromCell = board[fromRow][fromCol];
+            const toCell = board[toRow][toCol];
+            const attacker = fromCell.piece;
+            const defender = toCell.piece;
+            
+            // 检查是否是相邻攻击
+            const diffRow = Math.abs(fromRow - toRow);
+            const diffCol = Math.abs(fromCol - toCol);
+            
+            if (diffRow + diffCol !== 1) {
+                alert('只能攻击相邻的棋子！');
+                return;
+            }
+            
+            let result = '';
+            
+            // 处理炸弹
+            if (attacker.type === '炸' || defender.type === '炸') {
+                fromCell.piece = null;
+                toCell.piece = null;
+                result = '同归于尽！';
+            }
+            // 处理地雷
+            else if (defender.type === '雷') {
+                if (attacker.type === '工') {
+                    toCell.piece = null;
+                    fromCell.piece = attacker;
+                    result = '工兵成功排雷！';
+                } else {
+                    fromCell.piece = null;
+                    result = '撞到地雷了！';
+                }
+            }
+            // 处理军旗
+            else if (defender.type === '旗') {
+                endGame(currentPlayer === 'red' ? '蓝方' : '红方');
+                return;
+            }
+            // 正常战斗
+            else {
+                const attackerRank = PIECE_RANK[attacker.type];
+                const defenderRank = PIECE_RANK[defender.type];
+                
+                if (attackerRank > defenderRank) {
+                    toCell.piece = attacker;
+                    fromCell.piece = null;
+                    result = '攻击成功！';
+                } else if (attackerRank < defenderRank) {
+                    fromCell.piece = null;
+                    result = '攻击失败！';
+                } else {
+                    fromCell.piece = null;
+                    toCell.piece = null;
+                    result = '同归于尽！';
+                }
+            }
+            
+            updateCellDisplay(fromRow, fromCol);
+            updateCellDisplay(toRow, toCol);
+            
+            clearSelection();
+            
+            // 检查剩余棋子
+            checkWinCondition();
+            
+            // 切换玩家
+            currentPlayer = currentPlayer === 'red' ? 'blue' : 'red';
+            updateGameInfo();
+        }
+        
+        // 检查胜利条件
+        function checkWinCondition() {
+            let redHasFlag = false;
+            let blueHasFlag = false;
+            let redCanMove = false;
+            let blueCanMove = false;
+            
+            for (let i = 0; i < 8; i++) {
+                for (let j = 0; j < 12; j++) {
+                    const cell = board[i][j];
+                    if (cell.revealed && cell.piece) {
+                        if (cell.piece.color === 'red') {
+                            if (cell.piece.type === '旗') redHasFlag = true;
+                            redCanMove = true;
+                        } else {
+                            if (cell.piece.type === '旗') blueHasFlag = true;
+                            blueCanMove = true;
+                        }
+                    }
+                }
+            }
+            
+            if (!redHasFlag) {
+                endGame('蓝方');
+            } else if (!blueHasFlag) {
+                endGame('红方');
+            } else if (!redCanMove) {
+                endGame('蓝方');
+            } else if (!blueCanMove) {
+                endGame('红方');
+            }
+        }
+        
+        // 更新单元格显示
+        function updateCellDisplay(row, col) {
+            const cell = board[row][col];
+            const el = cell.element;
+            
+            el.className = 'cell';
+            
+            if (!cell.revealed || !cell.piece) {
+                el.classList.add('back');
+                el.textContent = '';
+            } else {
+                el.classList.add(cell.piece.color);
+                el.textContent = cell.piece.type;
+            }
+        }
+        
+        // 更新游戏信息
+        function updateGameInfo() {
+            const playerEl = document.getElementById('currentPlayer');
+            playerEl.textContent = currentPlayer === 'red' ? '🔴 红方回合' : '🔵 蓝方回合';
+            playerEl.style.color = currentPlayer === 'red' ? '#ff6b6b' : '#4a90d9';
+        }
+        
+        // 结束游戏
+        function endGame(winner) {
+            document.getElementById('winnerText').textContent = `🎉 ${winner}获胜！`;
+            document.getElementById('gameOverModal').style.display = 'flex';
+        }
+        
+        // 新游戏
+        function newGame() {
+            closeModal('gameOverModal');
+            closeModal('shareModal');
+            closeModal('rulesModal');
+            
+            currentPlayer = 'red';
+            selectedCell = null;
+            
+            initBoard();
+            setupPieces();
+            updateGameInfo();
+        }
+        
+        // 显示分享模态框
+        function showShareModal() {
+            const link = window.location.href;
+            document.getElementById('shareLink').textContent = link;
+            document.getElementById('shareModal').style.display = 'flex';
+        }
+        
+        // 复制链接
+        function copyLink() {
+            const link = document.getElementById('shareLink').textContent;
+            navigator.clipboard.writeText(link).then(() => {
+                alert('链接已复制！发送给 QQ 好友即可邀请对战');
+            });
+        }
+        
+        // 关闭模态框
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        // 显示规则
+        function showRules() {
+            document.getElementById('rulesModal').style.display = 'flex';
+        }
+        
+        // 初始化游戏
+        newGame();
+    </script>
+</body>
+</html>
